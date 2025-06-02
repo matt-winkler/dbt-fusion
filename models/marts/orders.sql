@@ -18,7 +18,7 @@ order_items_summary as (
 
     select
         order_id,
-        dateadd('day', '1', order_date) as one_day_ahead,
+        -- dateadd('day', '1', order_date) as one_day_ahead,
         sum(supply_cost) as order_cost,
         sum(product_price) as order_items_subtotal,
         count(order_item_id) as count_order_items,
@@ -39,7 +39,7 @@ order_items_summary as (
 
     from order_items
 
-   group by 1,2
+   group by 1
 
 ),
 
