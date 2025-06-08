@@ -39,7 +39,7 @@ order_items_summary as (
 
     from order_items
 
-   --group by 1
+   group by 1
 
 ),
 
