@@ -34,8 +34,7 @@ models:
     marts:
       +materialized: table
       # when there is new upstream data, AND the last build was more than 4 hours ago
-      aggregates:
-        +freshness:
-          build_after: 
-            count: 4
-            period: hour
+      +freshness:
+        build_after: 
+          count: 4
+          period: hour
