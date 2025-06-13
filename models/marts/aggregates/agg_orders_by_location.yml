@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: agg_orders_by_location
+    description: Aggregate model counting total orders by location and date.
+    columns:
+      - name: location_id
+        description: The location identifier.
+      - name: order_date
+        description: The date of the order.
+      - name: total_orders
+        description: The total number of orders for the location and date.
+    tests:
+      - unique:
+          column_name: "location_id || '-' || order_date" 
