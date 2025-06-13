@@ -1,5 +1,4 @@
 
-
 with
 
 orders as (
@@ -7,6 +6,7 @@ orders as (
     select * from {{ ref('stg_orders') }}
 
 ),
+
 
 order_items as (
 
@@ -18,7 +18,6 @@ order_items_summary as (
 
     select
         order_id,
-        -- dateadd('day', '1', order_date) as one_day_ahead,
         sum(supply_cost) as order_cost,
         sum(product_price) as order_items_subtotal,
         count(order_item_id) as count_order_items,
@@ -48,7 +47,7 @@ compute_booleans as (
     select
         orders.*,
 
-        order_items_summary.order_cost,
+        {{cents_to_dollars("order_items_summary.order_cost")}} as order_cost,
         order_items_summary.order_items_subtotal,
         order_items_summary.count_food_items,
         order_items_summary.count_drinks,

@@ -11,6 +11,11 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+# environment variable setup for task caching
+# DBT_CLOUD_PROJECT_ID: 430628
+# DBT_CLOUD_ENVIRONMENT_ID: 369849
+# DBT_CLOUD_ACCOUNT_IDENTIFIER: 28885
+
 seeds:
   # Builds seeds into '<your_schema_name>_raw'
   jaffle_shop:
@@ -18,11 +23,17 @@ seeds:
 
 models:
   jaffle_shop:
+    # build whenever there is any new upstream data
+    +freshness:
+      build_after: 
+        count: 0
+        period: minute
     # Materialize staging models as views, and marts as tables
     staging:
       +materialized: view
     marts:
       +materialized: table
+      # when there is new upstream data, AND the last build was more than 4 hours ago
       +freshness:
         build_after: 
           count: 4
