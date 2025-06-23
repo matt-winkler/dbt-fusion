@@ -10,7 +10,7 @@ models:
     versions:
       - v: 1
         config:
-          enabled: "{{is_model_current()}}"
+          #enabled: "{{is_model_current()}}"
           meta:
             deprecation_date: '2025-07-31'
         columns:
