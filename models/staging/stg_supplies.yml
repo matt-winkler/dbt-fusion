@@ -1,8 +1,7 @@
 models:
   - name: stg_supplies
-    latest_version: 2
+    latest_version: 2 # this the current active version of the model
     config:
-      enabled: "{{is_model_current()}}"
       post_hook: 
         - "{{create_latest_version_view()}}"
     description: >
@@ -11,8 +10,9 @@ models:
     versions:
       - v: 1
         config:
+          enabled: "{{is_model_current()}}"
           meta:
-            deprecation_date: '2025-08-01'
+            deprecation_date: '2025-07-31'
         columns:
           - name: supply_uuid
             description: The unique key of our supplies per cost.
@@ -48,8 +48,8 @@ models:
           - name: is_perishable_supply
             description: Boolean indicating if the supply is perishable.
       
-      - v: 3
+      - v: 3 # this is one we can push through without impacting the canonical view
         columns:
-          # This means: use the 'columns' list from above, but exclude country_name
+          # This means: use the 'columns' list from above, except is_perishable supply
           - include: all
             exclude: [is_perishable_supply]
