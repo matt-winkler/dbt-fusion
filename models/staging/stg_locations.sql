@@ -1,7 +1,7 @@
 
 {{
     config(
-        materialized = 'table'  
+        materialized = 'view'  
     )
 }}
 
@@ -9,7 +9,7 @@ with
 
 source as (
 
-    select * from {{ ref('raw_stores') }}
+    select * from {{ source('ecom', 'raw_stores') }}
 
 ),
 
