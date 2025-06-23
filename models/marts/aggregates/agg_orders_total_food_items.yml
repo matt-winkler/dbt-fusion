@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: agg_orders_total_food_items
+    description: Aggregate model computing total food items per order.
+    columns:
+      - name: order_id
+        description: The unique identifier for the order.
+      - name: total_food_items
+        description: The total number of food items in the order.
+
+unit_tests:
+  - name: test_total_food_items_per_order
+    description: "Test that the model correctly computes total food items per order."
+    model: agg_orders_total_food_items
+    given:
+      - input: ref('stg_order_items')
+        rows:
+          - { order_item_id: 1, order_id: 1, product_id: 10 }
+          - { order_item_id: 2, order_id: 1, product_id: 20 }
+          - { order_item_id: 3, order_id: 2, product_id: 10 }
+      - input: ref('stg_orders')
+        rows:
+          - { order_id: 1 }
+          - { order_id: 2 }
+      - input: ref('stg_products')
+        rows:
+          - { product_id: 10, is_food_item: true }
+          - { product_id: 20, is_food_item: false }
+    expect:
+      rows:
+        - { order_id: 1, total_food_items: 1 }
+        - { order_id: 2, total_food_items: 1 } 

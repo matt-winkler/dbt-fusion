@@ -21,7 +21,7 @@ products as (
 
 supplies as (
 
-    select * from {{ ref('stg_supplies') }}
+    select * from {{ ref('stg_supplies', v='1') }}
 
 ),
 
