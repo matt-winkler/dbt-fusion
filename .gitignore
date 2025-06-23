@@ -1,5 +1,7 @@
 
 .vscode/
-target/
-logs/
+
 dbt_internal_packages/
+logs/
+migration/
+target/
