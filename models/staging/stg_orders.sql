@@ -25,7 +25,7 @@ renamed as (
         {{ cents_to_dollars('order_total') }} as order_total,
 
         ---------- timestamps
-        cast(ordered_at as date) as order_date,
+        ordered_at as order_date,
         1 as default_order_flag
 
     from source

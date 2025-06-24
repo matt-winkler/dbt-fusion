@@ -1,0 +1,10 @@
+
+catalogs:
+  - name: matt_w_bq_catalog
+    active_write_integration: biglake_metastore
+    write_integrations:
+      - name: biglake_metastore
+        external_volume: 'gs://matt-w-iceberg'
+        table_format: iceberg
+        catalog_type: biglake_metastore
+        file_format: parquet
