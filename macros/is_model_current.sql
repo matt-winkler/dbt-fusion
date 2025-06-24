@@ -4,7 +4,6 @@
     {% do log(meta_config, info=true) %}
 
     {% if model.get('version') and model.get('version') == model.get('latest_version') %}
-
         {{return(true)}}
     
     {# why does this not work? #}

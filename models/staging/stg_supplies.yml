@@ -2,6 +2,7 @@ models:
   - name: stg_supplies
     latest_version: 2 # this the current active version of the model
     config:
+      #enabled: "{{is_model_current()}}"
       post_hook: 
         - "{{create_latest_version_view()}}"
     description: >
@@ -10,7 +11,6 @@ models:
     versions:
       - v: 1
         config:
-          #enabled: "{{is_model_current()}}"
           meta:
             deprecation_date: '2025-07-31'
         columns:
