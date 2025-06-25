@@ -2,7 +2,8 @@ models:
   - name: stg_supplies
     latest_version: 2 # this the current active version of the model
     config:
-      #enabled: "{{is_model_current()}}"
+      pre_hook:
+        - "{{is_model_expired()}}"
       post_hook: 
         - "{{create_latest_version_view()}}"
     description: >
