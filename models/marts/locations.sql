@@ -1,3 +1,5 @@
+{{config(materialized='table')}}
+
 with
 
 locations as (

@@ -26,8 +26,8 @@ models:
     # build whenever there is any new upstream data
     +freshness:
       build_after: 
-        count: 0
-        period: minute
+        count: 4
+        period: hour
     # Materialize staging models as views, and marts as tables
     staging:
       +materialized: view
@@ -36,5 +36,5 @@ models:
       # when there is new upstream data, AND the last build was more than 4 hours ago
       +freshness:
         build_after: 
-          count: 4
-          period: hour
+          count: 0
+          period: minute
