@@ -1,5 +1,6 @@
 
 .vscode/
+.venv/
 
 dbt_internal_packages/
 logs/
