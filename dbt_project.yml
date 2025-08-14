@@ -9,11 +9,7 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
-# environment variable setup for task caching
-# DBT_CLOUD_PROJECT_ID: 430628
-# DBT_CLOUD_ENVIRONMENT_ID: 369849
-# DBT_CLOUD_ACCOUNT_IDENTIFIER: 28885
-
+  
 seeds:
   # Builds seeds into '<your_schema_name>_raw'
   jaffle_shop:
@@ -36,3 +32,6 @@ models:
         build_after:
           count: 0
           period: minute
+
+quoting:
+  snowflake_ignore_case: true
