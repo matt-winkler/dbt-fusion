@@ -6,5 +6,5 @@
 dbt_internal_packages/
 logs/
 migration/
-models/sandbox/
+models/sandbox/ 
 target/
