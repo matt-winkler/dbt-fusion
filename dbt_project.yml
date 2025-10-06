@@ -32,6 +32,7 @@ models:
         build_after:
           count: 0
           period: minute
+          updates_on: all
 
 quoting:
   snowflake_ignore_case: true
