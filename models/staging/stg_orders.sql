@@ -7,7 +7,6 @@ source as (
     from {{ source('ecom', 'raw_orders') }}
 
 ),
-
 renamed as (
 
     select
