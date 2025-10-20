@@ -1,0 +1,13 @@
+models:
+  - name: orders_schema_control
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        data_type: string
+      - name: order_total
+        data_type: numeric(10, 2)
+      - name: order_date
+        data_type: date
+          
