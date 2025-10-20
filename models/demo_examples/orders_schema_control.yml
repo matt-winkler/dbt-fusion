@@ -6,6 +6,9 @@ models:
     columns:
       - name: order_id
         data_type: string
+        tests:
+          - unique
+          - not_null
       - name: order_total
         data_type: numeric(10, 2)
       - name: order_date

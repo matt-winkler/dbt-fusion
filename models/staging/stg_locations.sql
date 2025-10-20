@@ -27,7 +27,7 @@ renamed as (
         tax_rate,
 
         ---------- timestamps
-        cast(opened_at as date) as opened_date
+        date(datetime(opened_at)) as opened_date
 
     from source
 
