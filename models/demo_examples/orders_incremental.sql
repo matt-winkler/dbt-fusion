@@ -6,7 +6,8 @@
         partition_by={
             "field": "order_date",
             "data_type": "date"
-        }
+        },
+        on_schema_change='fail'
     )
 }}
 
