@@ -2,8 +2,8 @@ models:
   - name: stg_supplies
     latest_version: 2 # this really means "stable"
     config:
-      pre_hook:
-        - "{{is_model_expired()}}"
+      # pre_hook:
+      #   - "{{is_model_expired()}}"
       post_hook: 
         - "{{create_latest_version_view()}}"
     description: >
