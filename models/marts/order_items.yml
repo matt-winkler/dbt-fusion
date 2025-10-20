@@ -8,9 +8,9 @@ models:
       - name: order_id
         data_tests:
           - relationships:
-              to: ref('orders')
-              field: order_id
-
+              arguments:
+                to: ref('orders')
+                field: order_id
 unit_tests:
   - name: test_supply_costs_sum_correctly
     description: "Test that the supply costs sum correctly by product."
@@ -18,24 +18,24 @@ unit_tests:
     given:
       - input: ref('stg_supplies', v='1')
         rows:
-          - { supply_uuid: 1, supply_id: 1, product_id: 1, supply_name: "A", supply_cost: 4.50, is_perishable_supply: true }
-          - { supply_uuid: 2, supply_id: 2, product_id: 2, supply_name: "B", supply_cost: 3.50, is_perishable_supply: false }
-          - { supply_uuid: 3, supply_id: 3, product_id: 2, supply_name: "B", supply_cost: 5.00, is_perishable_supply: false }
+          - {supply_uuid: 1, supply_id: 1, product_id: 1, supply_name: "A", supply_cost: 4.50, is_perishable_supply: true}
+          - {supply_uuid: 2, supply_id: 2, product_id: 2, supply_name: "B", supply_cost: 3.50, is_perishable_supply: false}
+          - {supply_uuid: 3, supply_id: 3, product_id: 2, supply_name: "B", supply_cost: 5.00, is_perishable_supply: false}
       - input: ref('stg_products')
         rows:
-          - { product_id: 1 }
-          - { product_id: 2 }
+          - {product_id: 1}
+          - {product_id: 2}
       - input: ref('stg_order_items')
         rows:
-          - { order_id: 1, product_id: 1, order_item_id: 1 }
-          - { order_id: 2, product_id: 2, order_item_id: 2 }
-          - { order_id: 2, product_id: 2, order_item_id: 3 }
+          - {order_id: 1, product_id: 1, order_item_id: 1}
+          - {order_id: 2, product_id: 2, order_item_id: 2}
+          - {order_id: 2, product_id: 2, order_item_id: 3}
       - input: ref('stg_orders')
         rows:
-          - { order_id: 1 }
-          - { order_id: 2 }
+          - {order_id: 1}
+          - {order_id: 2}
     expect:
       rows:
-        - { order_id: 1, product_id: 1, supply_cost: 4.50 }
-        - { order_id: 2, product_id: 2, supply_cost: 8.50 }
-        - { order_id: 2, product_id: 2, supply_cost: 8.50 }
+        - {order_id: 1, product_id: 1, supply_cost: 4.50}
+        - {order_id: 2, product_id: 2, supply_cost: 8.50}
+        - {order_id: 2, product_id: 2, supply_cost: 8.50}

@@ -1,6 +1,6 @@
 models:
   - name: stg_supplies
-    latest_version: 2 # this the current active version of the model
+    latest_version: 2 # this really means "stable"
     config:
       pre_hook:
         - "{{is_model_expired()}}"
@@ -13,7 +13,7 @@ models:
       - v: 1
         config:
           meta:
-            deprecation_date: '2025-07-31'
+            deprecation_date: '2025-06-24'
         columns:
           - name: supply_uuid
             description: The unique key of our supplies per cost.
