@@ -46,7 +46,6 @@ compute_booleans as (
         orders.*,
 
         {{cents_to_dollars("order_items_summary.order_cost")}} as order_cost,
-        order_items_summary.order_items_subtotal,
         order_items_summary.count_food_items,
         order_items_summary.count_drinks,
         order_items_summary.count_order_items,
