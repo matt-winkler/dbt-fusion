@@ -2,6 +2,10 @@ name: jaffle_shop
 
 profile: jaffle_shop
 
+dbt-cloud:
+  project-id: 430628
+  defer-env-id: 369849
+
 seed-paths: ["seeds"]
 model-paths: ["models"]
 macro-paths: ["macros"]
