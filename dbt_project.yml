@@ -33,7 +33,7 @@ models:
       # when there is new upstream data, AND the last build was more than 4 hours ago
       +freshness:
         build_after:
-          count: 0
+          count: 1
           period: minute
           updates_on: all
 
