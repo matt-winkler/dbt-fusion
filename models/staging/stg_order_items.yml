@@ -1,4 +1,5 @@
 models:
+
   - name: stg_order_items
     description: Individual food and drink items that make up our orders, one row per item.
     columns:
@@ -12,5 +13,6 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_orders')
-              field: order_id
+              arguments:
+                to: ref('stg_orders')
+                field: order_id

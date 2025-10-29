@@ -1,4 +1,3 @@
-
 with
 
 orders as (
@@ -19,7 +18,6 @@ order_items_summary as (
     select
         order_id,
         sum(supply_cost) as order_cost,
-        sum(product_price) as order_items_subtotal,
         count(order_item_id) as count_order_items,
         
         -- Try switching these from 'sum' to 'count' and then run 'dbt test'
@@ -38,7 +36,7 @@ order_items_summary as (
 
     from order_items
 
-   group by 1
+    group by order_id
 
 ),
 
@@ -48,7 +46,6 @@ compute_booleans as (
         orders.*,
 
         {{cents_to_dollars("order_items_summary.order_cost")}} as order_cost,
-        order_items_summary.order_items_subtotal,
         order_items_summary.count_food_items,
         order_items_summary.count_drinks,
         order_items_summary.count_order_items,
@@ -76,5 +73,6 @@ customer_order_count as (
     from compute_booleans
 
 )
+
 
 select * from customer_order_count

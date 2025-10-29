@@ -1,7 +1,11 @@
-
+# environment settings
 .vscode/
+.venv/
 
+# dbt folders
 dbt_internal_packages/
 logs/
 migration/
+models/sandbox/ 
 target/
+tmp/

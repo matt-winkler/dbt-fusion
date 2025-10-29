@@ -5,17 +5,10 @@ profile: jaffle_shop
 seed-paths: ["seeds"]
 model-paths: ["models"]
 macro-paths: ["macros"]
-
-target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
-
-# environment variable setup for task caching
-# DBT_CLOUD_PROJECT_ID: 430628
-# DBT_CLOUD_ENVIRONMENT_ID: 369849
-# DBT_CLOUD_ACCOUNT_IDENTIFIER: 28885
-
+  
 seeds:
   # Builds seeds into '<your_schema_name>_raw'
   jaffle_shop:
@@ -25,9 +18,9 @@ models:
   jaffle_shop:
     # build whenever there is any new upstream data
     +freshness:
-      build_after: 
-        count: 0
-        period: minute
+      build_after:
+        count: 4
+        period: hour
     # Materialize staging models as views, and marts as tables
     staging:
       +materialized: view
@@ -35,6 +28,10 @@ models:
       +materialized: table
       # when there is new upstream data, AND the last build was more than 4 hours ago
       +freshness:
-        build_after: 
-          count: 4
-          period: hour
+        build_after:
+          count: 0
+          period: minute
+          updates_on: all
+
+quoting:
+  snowflake_ignore_case: true
