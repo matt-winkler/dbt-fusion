@@ -18,7 +18,6 @@ order_items_summary as (
     select
         order_id,
         sum(supply_cost) as order_cost,
-        sum(product_price) as order_items_subtotal,
         count(order_item_id) as count_order_items,
         
         -- Try switching these from 'sum' to 'count' and then run 'dbt test'
@@ -75,5 +74,6 @@ customer_order_count as (
     from compute_booleans
 
 )
+
 
 select * from customer_order_count
