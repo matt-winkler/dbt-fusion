@@ -6,6 +6,7 @@ models:
     columns:
       - name: order_id
         data_type: string
+        description: order identifier
         tests:
           - unique
           - not_null
@@ -13,4 +14,3 @@ models:
         data_type: numeric(10, 2)
       - name: order_date
         data_type: date
-          
