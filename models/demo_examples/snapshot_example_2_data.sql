@@ -20,6 +20,8 @@ select {{
             'channel'
             ])
         }} as sk_id,
+        skuId,
+        channel,
         deployStartTime,
         deployLevel as deployment_level,
         deploymentType as deployment_type
