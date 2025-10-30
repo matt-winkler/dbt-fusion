@@ -1,6 +1,6 @@
 snapshots:
-  - name: orders_snapshot
-    relation: ref('snapshot_source')
+  - name: snapshot_example_1_target
+    relation: ref('snapshot_example_1_data')
     config:
       strategy: timestamp
       updated_at: event_timestamp
@@ -9,3 +9,14 @@ snapshots:
       snapshot_meta_column_names:
         dbt_valid_from: eff_begin_period_timestamp
         dbt_valid_to: eff_end_period_timestamp
+  
+  - name: snapshot_example_2_target
+    relation: ref('snapshot_example_2_data')
+    config:
+      strategy: timestamp
+      updated_at: deployStartTime
+      unique_key: sk_id
+      dbt_valid_to_current: "timestamp('9999-12-31')"
+      snapshot_meta_column_names:
+        dbt_valid_from: eff_begin_tmstp
+        dbt_valid_to: eff_end_tmstp
