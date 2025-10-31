@@ -5,7 +5,7 @@ snapshots:
       strategy: timestamp
       updated_at: event_timestamp
       unique_key: sk_id
-      dbt_valid_to_current: "timestamp('9999-12-31')"
+      dbt_valid_to_current: "timestamp('9999-12-31 23:59:59')"
       snapshot_meta_column_names:
         dbt_valid_from: eff_begin_period_timestamp
         dbt_valid_to: eff_end_period_timestamp
@@ -14,9 +14,9 @@ snapshots:
     relation: ref('snapshot_example_2_data')
     config:
       strategy: timestamp
-      updated_at: deployStartTime
+      updated_at: updated_at
       unique_key: sk_id
-      dbt_valid_to_current: "timestamp('9999-12-31')"
+      dbt_valid_to_current: "timestamp('9999-12-31 23:59:59')"
       snapshot_meta_column_names:
-        dbt_valid_from: eff_begin_tmstp
-        dbt_valid_to: eff_end_tmstp
+       dbt_valid_from: eff_begin_tmstp
+       dbt_valid_to: eff_end_tmstp
