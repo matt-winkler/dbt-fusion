@@ -33,11 +33,6 @@ calculate_updated_at_time as (
          deployment_type,
          deployment_level,
          last_updated_time,
-        --  case when (end_time != timestamp('9999-12-31 23:59:59') and 
-        --            end_time > deploy_start_time)
-        --        then end_time
-        --        else deploy_start_time 
-        --        end as updated_at,
          deploy_start_time,
          end_time,
          case when end_time < deploy_start_time then 1 else 0 end as to_delete
