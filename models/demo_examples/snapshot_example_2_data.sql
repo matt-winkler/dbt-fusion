@@ -15,49 +15,45 @@ select timestamp('2025-10-30 3:00:00') as lastUpdatedTime,	4445612 as skuId, 	12
 ),
 
 processed as (
-    select {{
-        dbt_utils.generate_surrogate_key([
-            'skuId',
-            'channel'
-            ])
-        }} as sk_id,
+    select 
         skuId as sku_id,
         channel,
         deploymentType as deployment_type,
         deployLevel as deployment_level,
+        lastUpdatedTime as last_updated_time,
         parse_timestamp('%Y-%m-%d %H:%M:%S', deployStartTime) as deploy_start_time,
-        parse_timestamp('%Y-%m-%d %H:%M:%S', coalesce(cast(endTime as string), 
-                   '9999-12-31 23:59:59')) as eff_end_tmstmp
+        parse_timestamp('%Y-%m-%d %H:%M:%S', cast(endTime as string)) as end_time
         
     from source_data
 ),
 
-mark_deletes as (
-  select sk_id,
-         sku_id,
+calculate_updated_at_time as (
+  select sku_id,
          channel,
          deployment_type,
          deployment_level,
-         case when (eff_end_tmstmp != timestamp('9999-12-31 23:59:59') and 
-                   eff_end_tmstmp > deploy_start_time)
-               then eff_end_tmstmp
-               else deploy_start_time 
-               end as updated_at,
-         eff_end_tmstmp,
-         case when eff_end_tmstmp > deploy_start_time then 1 else 0 end as to_delete
+         last_updated_time,
+        --  case when (end_time != timestamp('9999-12-31 23:59:59') and 
+        --            end_time > deploy_start_time)
+        --        then end_time
+        --        else deploy_start_time 
+        --        end as updated_at,
+         deploy_start_time,
+         end_time,
+         case when end_time < deploy_start_time then 1 else 0 end as to_delete
   from processed
 ),
-
+ 
 final as (
-    select sk_id, 
-           sku_id, 
-           channel,
-           deployment_type,
-           deployment_level,
-           updated_at,
-           --eff_end_tmstmp,
-           to_delete
-    from mark_deletes
+    select {{
+        dbt_utils.generate_surrogate_key([
+            'sku_id',
+            'channel'
+            ])
+        }} as sk_id, 
+        *
+
+    from calculate_updated_at_time
 )
 
 select * from final

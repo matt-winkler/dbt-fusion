@@ -14,9 +14,6 @@ snapshots:
     relation: ref('snapshot_example_2_data')
     config:
       strategy: timestamp
-      updated_at: updated_at
+      updated_at: last_updated_time
       unique_key: sk_id
-      dbt_valid_to_current: "timestamp('9999-12-31 23:59:59')"
-      snapshot_meta_column_names:
-       dbt_valid_from: eff_begin_tmstp
-       dbt_valid_to: eff_end_tmstp
+      #dbt_valid_to_current: "timestamp('9999-12-31 23:59:59')"
