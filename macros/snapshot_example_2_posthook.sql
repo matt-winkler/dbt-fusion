@@ -16,8 +16,10 @@
             cte_data AS (
                 SELECT
                     dbt_scd_id,
-                    coalesce({{eff_end_column_name}}, lead({{eff_start_column_name}}, 1) 
-                    over (partition by {{partition_key}} order by dbt_updated_at)) as new_value
+                    coalesce(
+                        {{eff_end_column_name}}, 
+                        lead({{eff_start_column_name}}, 1) over (partition by {{partition_key}} order by dbt_updated_at)
+                    ) as new_value
                     
                 FROM
                     {{target_table}}
@@ -29,6 +31,7 @@
             cte_data
     ) AS sub
   WHERE
-    t.dbt_scd_id = sub.dbt_scd_id; 
+    t.dbt_scd_id = sub.dbt_scd_id
+    and t.{{eff_end_column_name}} is null; 
 
 {% endmacro %}
