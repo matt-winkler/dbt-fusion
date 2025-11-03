@@ -20,3 +20,11 @@ snapshots:
       post_hook: 
         - "{{snapshot_example_2__remove_invalid_records(this, 'to_delete', 1)}}"
         - "{{snapshot_example_2__update_end_time(this, 'end_time', 'deploy_start_time', 'sk_id')}}"
+  
+  # - name: snapshot_example_3_target
+  #   relation: ref('snapshot_example_3_data')
+  #   config:
+  #     strategy: timestamp
+  #     updated_at: as_of
+  #     unique_key: sk_id
+  #     dbt_valid_to_current: "timestamp('9999-12-31 23:59:59')"
