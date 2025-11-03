@@ -27,28 +27,16 @@ processed as (
     from source_data
 ),
 
-calculate_updated_at_time as (
-  select sku_id,
-         channel,
-         deployment_type,
-         deployment_level,
-         last_updated_time,
-         deploy_start_time,
-         end_time,
-         case when end_time < deploy_start_time then 1 else 0 end as to_delete
-  from processed
-),
- 
 final as (
-    select {{
+  select {{
         dbt_utils.generate_surrogate_key([
             'sku_id',
             'channel'
             ])
         }} as sk_id, 
-        *
-
-    from calculate_updated_at_time
+         *,
+         case when end_time < deploy_start_time then 1 else 0 end as to_delete
+  from processed
 )
 
 select * from final
