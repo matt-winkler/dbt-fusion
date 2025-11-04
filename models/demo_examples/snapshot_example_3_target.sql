@@ -2,38 +2,67 @@
     config(
         materialized='incremental',
         incremental_strategy='merge',
-        unique_key='sk_id'
+        unique_key='sk_id',
+        post_hook=[
+            "delete from {{this}} where to_delete = 1;",
+            "{{snapshot_example_3__update_end_time(this, 'eff_end_tmstmp', 'eff_begin_tmstmp', 'sk_id', 'business_key')}}"
+        ]
     )
 }}
 
 {% if not is_incremental() %}
    select *,
           as_of as eff_begin_tmstmp,
-          lead(as_of, 1) over (partition by business_key order by as_of) as eff_end_tmstmp,
+          timestamp("9999-12-31 23:59:59") as eff_end_tmstmp,
           0 as to_delete
    from {{ref('snapshot_example_3_data')}}
 
 {% else %}
+
 with new_records as (
     select new_records.*,
+           new_records.as_of as eff_begin_tmstmp,
+           timestamp("9999-12-31 23:59:59") as eff_end_tmstmp,
            0 as to_delete
     from {{ref('snapshot_example_3_data')}} new_records
     -- can turn all of the below into it's own macro
-    
-    left join (
+    join (
         select business_key, max(event_time) as max_event_time 
         from {{this}}
         group by business_key
      ) as target_table
       on new_records.business_key = target_table.business_key
-    where new_records.event_time > target_table.max_event_time
-
+      and new_records.event_time > target_table.max_event_time
 ),
+
 mark_deletes as (
-    select 1 as id
+
+    select target_table.sk_id,
+           target_table.business_key,
+           target_table.event_time,
+           target_table.as_of,
+           target_table.rms_sku_num,
+           target_table.store_num,
+           target_table.price_type,
+           target_table.price_amount,
+           target_table.currency,
+           target_table.eff_begin_tmstmp,
+           target_table.eff_end_tmstmp,
+           1 as to_delete
+    from {{this}} as target_table
+    join  (
+        select business_key, 
+               event_time,
+               min(as_of) as min_as_of
+        from new_records
+        group by business_key, event_time
+    ) as new_records 
+      on  target_table.business_key = new_records.business_key
+      and target_table.event_time < new_records.event_time
+      and target_table.as_of > new_records.min_as_of
 )
 
 select * from new_records
-union all
+union all 
 select * from mark_deletes
 {% endif %}
