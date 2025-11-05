@@ -18,7 +18,7 @@ with change_set as (
    from {{ref('snapshot_example_3_data')}} upstream_data
    join {{ref('snapshot_example_3_include_events')}} include_events
     on upstream_data.sk_id = include_events.sk_id
-),
+)
 
 {% if not is_incremental() %}
    
@@ -26,14 +26,13 @@ with change_set as (
 
 {% else %}
 
-with new_records as (
+, new_records as (
     select change_set.*
     from change_set
     -- can turn all of the below into it's own macro
     join (
         select business_key, max(event_time) as max_event_time 
         from {{this}}
-        --from `sales-demo-project-314714`.`dbt_mwinkler`.`snapshot_example_3_target`
         group by business_key
      ) as target_table
       on change_set.business_key = target_table.business_key
@@ -54,20 +53,18 @@ mark_deletes as (
            target_table.eff_begin_tmstmp,
            target_table.eff_end_tmstmp,
            1 as to_delete
-    --from {{this}} as target_table
     from {{this}} as target_table
     join  (
         select business_key, 
                event_time,
                min(as_of) as min_as_of
-        from change_set
+        from new_records
         group by business_key, event_time
     ) as new_records 
       on  target_table.business_key = new_records.business_key
       and target_table.event_time < new_records.event_time
       and target_table.as_of > new_records.min_as_of
 )
---select * from mark_deletes
 
 select * from new_records
 union all 
