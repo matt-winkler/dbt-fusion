@@ -1,0 +1,136 @@
+================================================================================
+🎯 SEMANTIC LAYER READINESS ASSESSMENT
+================================================================================
+
+Overall Score: 32.3/100 (32.3%)
+Overall Grade: 🔴 NOT READY
+Assessment: Significant work needed before semantic layer implementation.
+
+================================================================================
+
+1. Mart Layer Maturity (30%)
+Score: 13.0/30 (43.3%) - 🔴 Not Ready
+
+Findings:
+  • Found 6 mart models out of 15 total models
+  • ✓ Good mart layer coverage
+  • Grain documented for 1/6 mart models (17%)
+
+Recommendations:
+  • ❌ Critical: Add grain documentation to all mart models
+
+--------------------------------------------------------------------------------
+
+2. Column Documentation Quality (25%)
+Score: 9.0/25 (36.0%) - 🔴 Not Ready
+
+Findings:
+  • Column documentation: 16/37 (43%)
+  • Columns with units: 1/37 (3%)
+  • Business-friendly names: 36/37 (97%)
+  • ✓ Good column naming conventions
+
+Recommendations:
+  • ⚠️ Many columns lack documentation
+  • ⚠️ Add units to measure columns (e.g., 'Total revenue in USD')
+
+--------------------------------------------------------------------------------
+
+3. Relationship Documentation (20%)
+Score: 2.3/20 (11.4%) - 🔴 Not Ready
+
+Findings:
+  • Foreign keys found: 7
+  • FKs with relationship tests: 2/7 (29%)
+  • Clear FK naming: 1/7 (14%)
+  • Models with join documentation: 0/6
+
+Recommendations:
+  • ⚠️ Add relationship tests to validate foreign key constraints
+  • ⚠️ Use consistent FK naming (e.g., customer_id, product_key)
+  • ❌ Add relationship documentation (e.g., 'Joins to dim_customers on customer_id')
+
+--------------------------------------------------------------------------------
+
+4. Measure vs Dimension Clarity (10%)
+Score: 5.0/10 (50.0%) - 🟡 Needs Prep
+
+Findings:
+  • Numeric columns: 15
+  • Likely measures: 12
+  • Measures with aggregation hints: 2
+  • ✓ Good measure naming patterns
+
+Recommendations:
+  • ❌ Add aggregation hints (e.g., 'Sum this for total revenue')
+
+--------------------------------------------------------------------------------
+
+5. Temporal Consistency (5%)
+Score: 3.0/5 (60.0%) - 🟡 Needs Prep
+
+Findings:
+  • Mart models with date columns: 3/6 (50%)
+
+Recommendations:
+  • Add date columns to more fact tables
+  • ⚠️ Standardize date column naming across models
+
+--------------------------------------------------------------------------------
+
+6. Source Freshness Configuration (5%)
+Score: 0.0/5 (0.0%) - 🔴 Not Ready
+
+Findings:
+  • Sources with freshness checks: 1/6 (17%)
+  • Example configured sources: ecom.raw_orders
+
+Recommendations:
+  • ❌ Critical: Configure source freshness checks (warn_after, error_after)
+
+--------------------------------------------------------------------------------
+
+7. Ownership Metadata (5%)
+Score: 0.0/5 (0.0%) - 🔴 Not Ready
+
+Findings:
+  • Mart models with owner metadata: 0/6 (0%)
+  • Columns with owner metadata: 0/37 (0%)
+
+Recommendations:
+  • ❌ Critical: Add owner metadata to mart models for accountability
+
+--------------------------------------------------------------------------------
+
+🎯 PRIORITY ACTIONS
+================================================================================
+
+Critical (Must Fix):
+  ❌ Critical: Add grain documentation to all mart models
+  ❌ Add relationship documentation (e.g., 'Joins to dim_customers on customer_id')
+  ❌ Add aggregation hints (e.g., 'Sum this for total revenue')
+  ❌ Critical: Configure source freshness checks (warn_after, error_after)
+  ❌ Critical: Add owner metadata to mart models for accountability
+
+Important (Should Fix):
+  ⚠️ Many columns lack documentation
+  ⚠️ Add units to measure columns (e.g., 'Total revenue in USD')
+  ⚠️ Add relationship tests to validate foreign key constraints
+  ⚠️ Use consistent FK naming (e.g., customer_id, product_key)
+  ⚠️ Standardize date column naming across models
+
+Nice to Have:
+  Add date columns to more fact tables
+
+================================================================================
+📊 NEXT STEPS
+================================================================================
+
+🔨 Foundational work needed:
+   1. Build or refine your mart/presentation layer
+   2. Document the grain of each mart model
+   3. Add comprehensive column descriptions
+   4. Establish clear naming conventions
+   5. Re-run this assessment after improvements
+
+================================================================================

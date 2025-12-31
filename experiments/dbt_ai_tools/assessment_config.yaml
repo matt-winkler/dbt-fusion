@@ -1,0 +1,118 @@
+# Semantic Layer Readiness Assessment Configuration
+# Customize these patterns to match your dbt project conventions
+
+# Patterns that indicate a model is a mart/final layer
+mart_identification:
+  # Name prefixes to identify mart models
+  prefixes:
+    - fct_
+    - dim_
+    - fact_
+    - mart_
+    - rpt_
+    - report_
+  
+  # Folder names that contain mart models
+  folders:
+    - marts
+    - mart
+    - core
+    - presentation
+    - reports
+    - gold
+  
+  # Metadata fields to check in config.meta for mart designation
+  meta_fields:
+    - layer
+    - type
+    - model_type
+    - mart_type
+  
+  # Values that indicate a mart/final layer model
+  meta_indicators:
+    - fct
+    - dim
+    - fact
+    - dimension
+    - mart
+    - rpt
+    - report
+    - core
+    - presentation
+
+# Patterns that indicate a model is specifically a fact table (subset of marts)
+# Note: A model must first be identified as a mart model (above) to be considered a fact
+# Fact tables typically contain measures and foreign keys, while dimension tables contain attributes
+fact_identification:
+  # Name prefixes that indicate fact models
+  prefixes:
+    - fct_
+    - fact_
+  
+  # Folder names that contain fact models
+  folders:
+    - facts
+    - fact
+  
+  # Metadata field values that indicate fact models (checked in layer/type/model_type fields)
+  # These are checked against the same meta_fields from mart_identification
+  meta_indicators:
+    - fct
+    - fact
+    - facts
+
+# Keywords that indicate grain documentation
+grain_documentation:
+  keywords:
+    - one row per
+    - grain
+    - granularity
+    - each row represents
+    - row represents
+    - unique by
+    - keyed by
+
+# Patterns to identify temporal/date columns
+temporal_columns:
+  # Column name patterns
+  patterns:
+    - _date
+    - _at
+    - _time
+    - _ts
+    - _timestamp
+    - date_
+    - dt_
+  
+  # Model-level metadata fields that designate the primary temporal field
+  model_meta_fields:
+    - temporal_field
+    - time_field
+    - date_field
+    - event_time
+    - event_date
+
+# Keywords that suggest a column is a measure/metric
+measure_identification:
+  # Column name keywords
+  keywords:
+    - total
+    - sum
+    - count
+    - amount
+    - value
+    - price
+    - cost
+    - revenue
+    - quantity
+    - qty
+    - number
+    - avg
+    - average
+  
+  # Model-level metadata fields that contain lists of measure columns
+  model_meta_fields:
+    - measures
+    - measure_columns
+    - metric_columns
+
