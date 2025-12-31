@@ -10,23 +10,23 @@ A collection of tools to assess and enhance dbt projects for AI/LLM consumption.
 
 Evaluates whether your dbt project is ready to build a semantic layer that will be consumed by LLMs. The assessment covers five key dimensions with emphasis on temporal data, freshness, and ownership:
 
-1. **Temporal Consistency (32%)** - Are date columns consistent and well-documented across all models?
-2. **Column Documentation Quality (21%)** - Are columns documented with business context and units?
-3. **Relationship Documentation (21%)** - Are table relationships clear, documented, and tested with dbt relationship tests?
-4. **Ownership Metadata (13%)** - Are owners/teams defined in meta properties for accountability?
-5. **Source Freshness Configuration (13%)** - Are source freshness checks configured to ensure data recency?
+1. **Temporal Consistency (30%)** - % of fact models with clear, consistent temporal columns
+2. **Column Documentation (20%)** - % of columns with meaningful descriptions
+3. **Relationship Documentation (20%)** - % of mart models with at least one relationship test
+4. **Ownership Metadata (15%)** - % of mart models with owner metadata defined
+5. **Source Freshness Configuration (15%)** - % of sources with freshness checks configured
 
 #### Key Features
 
-- **Temporal-First Design**: 32% weight on temporal consistency - critical for time-based LLM queries
-- **Structured Metadata**: Checks `config.meta` for explicit field designations at both model and column levels
+- **Temporal-First Design**: 30% weight on temporal consistency - critical for time-based LLM queries
+- **Structured Metadata**: Checks `config.meta` for explicit field designations at model and column levels
   - Mart layer: `layer`, `type`, or `model_type` (model-level)
   - Temporal fields: `temporal_field`, `time_field`, `date_field`, `event_time`, `event_date` (model-level) or `is_temporal_field` (column-level)
   - Measures: `measures`, `measure_columns`, `metric_columns` (model-level list) or `is_measure` (column-level)
   - Grain: `grain` or `granularity` (model-level)
-  - Ownership: `owner`, `owners`, `team`, `contact` (model or column-level)
-- **Smart Relationship Detection**: Prioritizes dbt `relationships` tests over naming conventions to identify foreign keys
-- **Data Governance Focus**: 26% combined weight on freshness and ownership for production-ready AI systems
+  - Ownership: `owner`, `owners`, `team`, `contact` (model-level only)
+- **Smart Relationship Detection**: Uses dbt `relationships` tests to identify validated foreign keys
+- **Data Governance Focus**: 30% combined weight on freshness and ownership for production-ready AI systems
 - **Source Freshness Analysis**: Evaluates whether sources have `warn_after` and `error_after` thresholds configured
 - **Backward Compatible**: Falls back to naming conventions and descriptions if metadata not present
 - **Actionable Recommendations**: Suggests specific dbt tests and configurations to add for better data quality
@@ -76,6 +76,9 @@ The tool uses `assessment_config.yaml` for pattern matching. You can customize i
    - `keywords`: Column name keywords (e.g., `total`, `revenue`)
    - `model_meta_fields`: Model-level meta fields (e.g., `measures`)
 
+6. **`ownership_metadata`** - How to identify ownership information
+   - `meta_fields`: Config.meta fields for ownership (e.g., `owner`, `team`)
+
 **Example: Customize for your company**
 
 Edit `assessment_config.yaml` or create your own:
@@ -101,6 +104,12 @@ measure_identification:
   model_meta_fields:
     - measures
     - kpis                # Your custom meta field
+
+ownership_metadata:
+  meta_fields:
+    - owner
+    - owner_email         # Your custom ownership field
+    - responsible_team
 ```
 
 Then run with your custom config:
@@ -160,24 +169,29 @@ Score: 0.0/12 (0.0%) - 🔴 Not Ready
 - **🟡 50-79%**: Needs preparation work first
 - **🔴 0-49%**: Significant foundational work needed
 
-**Note:** All five dimensions are required for full readiness. The scoring emphasizes **temporal consistency** (32%), as time-based queries are the most common in LLM-powered analytics.
+**Note:** All five dimensions are required for full readiness. The scoring emphasizes **temporal consistency** (30%), as time-based queries are the most common in LLM-powered analytics.
 
 #### Why This Scoring Distribution?
 
-The weights reflect what matters most for **LLM-powered analytics**:
+The weights reflect what matters most for **LLM-powered analytics**. All dimensions use **ratio-based scoring** to measure coverage:
 
-1. **Temporal Consistency (32%)** - THE MOST CRITICAL
+1. **Temporal Consistency (30%)** - THE MOST CRITICAL
    - Time-based questions dominate analytics: "last quarter", "YoY", "trends over time"
-   - LLMs struggle without consistent date columns and naming
+   - Fact tables MUST have consistent date columns and naming
+   - **Metric**: % of fact models with temporal columns + naming consistency
    - Example: "Show revenue last 6 months" requires clear, consistent temporal columns
 
-2. **Documentation & Relationships (42%: Columns 21% + Relationships 21%)**
-   - **Column Documentation (21%)**: Business context, units, and clear naming for LLM understanding
-   - **Relationship Documentation (21%)**: How tables connect via tested relationship constraints
+2. **Documentation & Relationships (40%: Columns 20% + Relationships 20%)**
+   - **Column Documentation (20%)**: Business context and descriptions for LLM understanding
+     - **Metric**: % of columns with meaningful documentation (>10 characters)
+   - **Relationship Documentation (20%)**: Models with dbt relationship tests ensure data quality
+     - **Metric**: % of mart models with at least one relationship test
 
-3. **Data Governance (26%: Ownership 13% + Freshness 13%)**
-   - **Ownership (13%)**: LLMs need to route questions to the right team
-   - **Source Freshness (13%)**: LLMs need to know if data is current
+3. **Data Governance (30%: Ownership 15% + Freshness 15%)**
+   - **Ownership (15%)**: LLMs need to route questions to the right team
+     - **Metric**: % of mart models with owner metadata
+   - **Source Freshness (15%)**: LLMs need to know if data is current
+     - **Metric**: % of sources with freshness checks configured
 
 #### Configuring Metadata for AI Readiness
 
@@ -295,7 +309,7 @@ models:
 
 **Ownership Metadata:**
 
-The tool looks for ownership keys: `owner`, `owners`, `team`, `contact`.
+The tool looks for ownership keys at the model level: `owner`, `owners`, `team`, `contact`.
 
 ```yaml
 models:
@@ -308,18 +322,6 @@ models:
     columns:
       - name: order_id
         description: Unique order identifier
-```
-
-**Column-level ownership (optional):**
-
-```yaml
-columns:
-  - name: customer_lifetime_value
-    description: Predicted CLV in USD
-    config:
-      meta:
-        owner: ml-team
-        contact: ml@company.com
 ```
 
 This structured metadata helps LLMs understand grain, ownership, and data context!

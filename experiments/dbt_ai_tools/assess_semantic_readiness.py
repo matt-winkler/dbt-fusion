@@ -83,6 +83,9 @@ class SemanticLayerReadinessAssessor:
         self.MEASURE_KEYWORDS = measure_config.get('keywords', [])
         self.MEASURE_META_FIELDS = measure_config.get('model_meta_fields', [])
         
+        ownership_config = self.config.get('ownership_metadata', {})
+        self.OWNER_KEYS = ownership_config.get('meta_fields', [])
+        
         # Load manifest and index data
         self.manifest = self._load_manifest()
         self.models = self._get_models()
@@ -122,6 +125,9 @@ class SemanticLayerReadinessAssessor:
                     'keywords': ['total', 'sum', 'count', 'amount', 'value', 'price', 'cost',
                                'revenue', 'quantity', 'qty', 'number', 'avg', 'average'],
                     'model_meta_fields': ['measures', 'measure_columns', 'metric_columns']
+                },
+                'ownership_metadata': {
+                    'meta_fields': ['owner', 'owners', 'team', 'contact']
                 }
             }
         except yaml.YAMLError as e:
@@ -475,7 +481,7 @@ class SemanticLayerReadinessAssessor:
     
     def _analyze_ownership_metadata(self, models: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Analyze ownership metadata at model and column levels.
+        Analyze ownership metadata at model level only.
         
         Args:
             models: Dictionary of models to analyze
@@ -485,10 +491,6 @@ class SemanticLayerReadinessAssessor:
         """
         total_models = len(models)
         models_with_owner = 0
-        total_columns = 0
-        columns_with_owner = 0
-        
-        owner_keys = ['owner', 'owners', 'team', 'contact']  # Common owner field names
         
         for model_id, model in models.items():
             # Check model-level meta for owner
@@ -496,31 +498,18 @@ class SemanticLayerReadinessAssessor:
             # Important: If meta is not found, set it to an empty dictionary
             if not model_meta:
                 model_meta = {}
-            if any(key in model_meta for key in owner_keys):
+            if any(key in model_meta for key in self.OWNER_KEYS):
                 models_with_owner += 1
-            
-            # Check column-level meta for owner
-            columns = model.get('columns', {})
-            for col_name, col_info in columns.items():
-                total_columns += 1
-                col_meta = col_info.get('config', {}).get('meta', {})
-                if not col_meta:
-                    col_meta = {}
-                if any(key in col_meta for key in owner_keys):
-                    columns_with_owner += 1
         
         return {
             'total_models': total_models,
             'models_with_owner': models_with_owner,
             'model_owner_ratio': models_with_owner / total_models if total_models > 0 else 0,
-            'total_columns': total_columns,
-            'columns_with_owner': columns_with_owner,
-            'column_owner_ratio': columns_with_owner / total_columns if total_columns > 0 else 0,
         }
     
     def assess_column_documentation(self) -> AssessmentScore:
-        """Assess column-level documentation quality (21 points)."""
-        score = AssessmentScore(score=0, max_score=21)
+        """Assess column-level documentation quality (20 points)."""
+        score = AssessmentScore(score=0, max_score=20)
         
         mart_models = {k: v for k, v in self.models.items() if self._is_mart_model(v)}
         
@@ -530,8 +519,6 @@ class SemanticLayerReadinessAssessor:
         
         total_columns = 0
         documented_columns = 0
-        columns_with_units = 0
-        business_friendly_names = 0
         
         for model in mart_models.values():
             columns = model.get('columns', {})
@@ -543,66 +530,33 @@ class SemanticLayerReadinessAssessor:
                 # Check if documented
                 if description and len(description) > 10:
                     documented_columns += 1
-                    
-                    # Check for units (USD, $, cents, units, etc.)
-                    desc_lower = description.lower()
-                    if any(unit in desc_lower for unit in ['usd', '$', 'cents', 'dollars', 'units', 'count', 'percentage', '%']):
-                        columns_with_units += 1
-                
-                # Check for business-friendly naming (not col_1, not single letters unless ID)
-                if not col_name.startswith('col_') and len(col_name) > 2 and '_' in col_name:
-                    business_friendly_names += 1
         
         if total_columns == 0:
             score.recommendations.append("No columns found in mart models")
             return score
         
         doc_ratio = documented_columns / total_columns
-        unit_ratio = columns_with_units / total_columns
-        naming_ratio = business_friendly_names / total_columns
         
         score.findings.append(f"Column documentation: {documented_columns}/{total_columns} ({doc_ratio*100:.0f}%)")
-        score.findings.append(f"Columns with units: {columns_with_units}/{total_columns} ({unit_ratio*100:.0f}%)")
-        score.findings.append(f"Business-friendly names: {business_friendly_names}/{total_columns} ({naming_ratio*100:.0f}%)")
         
-        # Score: Documentation presence (11 points)
+        # Score: Documentation presence (20 points)
         if doc_ratio >= 0.8:
-            score.score += 11
+            score.score += 20
             score.findings.append("✓ Excellent column documentation coverage")
         elif doc_ratio >= 0.6:
-            score.score += 7
+            score.score += 13
             score.recommendations.append("Document more columns with business context")
         elif doc_ratio >= 0.3:
-            score.score += 3
+            score.score += 6
             score.recommendations.append("⚠️ Many columns lack documentation")
         else:
             score.recommendations.append("❌ Critical: Most columns are undocumented")
         
-        # Score: Unit documentation (6 points)
-        if unit_ratio >= 0.3:  # Expecting at least 30% of columns to have units (measures)
-            score.score += 6
-            score.findings.append("✓ Good unit documentation for measures")
-        elif unit_ratio >= 0.15:
-            score.score += 3
-            score.recommendations.append("Add units (USD, quantity, etc.) to numeric column descriptions")
-        else:
-            score.recommendations.append("⚠️ Add units to measure columns (e.g., 'Total revenue in USD')")
-        
-        # Score: Naming conventions (4 points)
-        if naming_ratio >= 0.8:
-            score.score += 4
-            score.findings.append("✓ Good column naming conventions")
-        elif naming_ratio >= 0.5:
-            score.score += 2
-            score.recommendations.append("Improve column naming consistency")
-        else:
-            score.recommendations.append("⚠️ Use business-friendly column names (e.g., order_total not col_5)")
-        
         return score
     
     def assess_relationship_documentation(self) -> AssessmentScore:
-        """Assess relationship documentation (21 points)."""
-        score = AssessmentScore(score=0, max_score=21)
+        """Assess relationship documentation (20 points)."""
+        score = AssessmentScore(score=0, max_score=20)
         
         mart_models = {k: v for k, v in self.models.items() if self._is_mart_model(v)}
         
@@ -610,80 +564,49 @@ class SemanticLayerReadinessAssessor:
             score.recommendations.append("No mart models to assess relationships")
             return score
         
-        total_fks = 0
-        clear_fk_naming = 0
-        documented_joins = 0
-        fks_with_tests = 0
+        models_with_relationships = 0
+        total_relationships = 0
         
+        # Count mart models that have at least one relationship test
         for model_id, model in mart_models.items():
             columns = model.get('columns', {})
-            description = model.get('description', '').lower()
-            
-            # Check for join documentation in model description
-            if 'join' in description or 'relationship' in description or 'foreign key' in description:
-                documented_joins += 1
+            model_has_relationship = False
             
             for col_name, col_info in columns.items():
                 if self._is_foreign_key(model_id, col_name):
-                    total_fks += 1
-                    
-                    # Check if FK has a relationship test
-                    if (model_id, col_name.lower()) in self.relationship_tests:
-                        fks_with_tests += 1
-                    
-                    # Check if FK follows clear naming pattern
-                    if col_name.endswith('_id') or col_name.endswith('_key'):
-                        clear_fk_naming += 1
-        
-        score.findings.append(f"Foreign keys found: {total_fks}")
-        if total_fks > 0:
-            score.findings.append(f"FKs with relationship tests: {fks_with_tests}/{total_fks} ({fks_with_tests/total_fks*100:.0f}%)")
-            score.findings.append(f"Clear FK naming: {clear_fk_naming}/{total_fks} ({clear_fk_naming/total_fks*100:.0f}%)")
-        else:
-            score.findings.append("No foreign keys detected")
-        score.findings.append(f"Models with join documentation: {documented_joins}/{len(mart_models)}")
-        
-        # Score: FK documentation with tests and naming (12 points)
-        if total_fks > 0:
-            # Prioritize relationship tests (60% weight) over naming conventions (40% weight)
-            test_ratio = fks_with_tests / total_fks
-            naming_ratio = clear_fk_naming / total_fks
+                    total_relationships += 1
+                    model_has_relationship = True
             
-            # Weighted score: tests are more valuable than just naming
-            combined_score = (test_ratio * 0.6 + naming_ratio * 0.4) * 12
-            score.score += combined_score
-            
-            if test_ratio >= 0.8:
-                score.findings.append("✓ Excellent relationship test coverage")
-            elif test_ratio >= 0.5:
-                score.findings.append("✓ Good relationship test coverage")
-                score.recommendations.append("Add relationship tests to remaining foreign keys")
-            elif test_ratio >= 0.2:
-                score.recommendations.append("⚠️ Add relationship tests to validate foreign key constraints")
-            else:
-                score.recommendations.append("❌ Critical: Add relationship tests (e.g., relationships: {to: ref('dim_customers'), field: id})")
-            
-            if naming_ratio < 0.7 and test_ratio < 0.7:
-                score.recommendations.append("⚠️ Use consistent FK naming (e.g., customer_id, product_key)")
-        else:
-            score.recommendations.append("⚠️ No foreign keys detected - ensure relationships are modeled")
+            if model_has_relationship:
+                models_with_relationships += 1
         
-        # Score: Relationship documentation (9 points)
-        join_doc_ratio = documented_joins / len(mart_models) if mart_models else 0
-        if join_doc_ratio >= 0.5:
-            score.score += 9
-            score.findings.append("✓ Good relationship documentation")
-        elif join_doc_ratio >= 0.2:
-            score.score += 4
-            score.recommendations.append("Document join patterns in model descriptions")
+        relationship_ratio = models_with_relationships / len(mart_models) if mart_models else 0
+        
+        score.findings.append(f"Mart models with relationship tests: {models_with_relationships}/{len(mart_models)} ({relationship_ratio*100:.0f}%)")
+        score.findings.append(f"Total relationship tests defined: {total_relationships}")
+        
+        # Score: Relationship test coverage (20 points)
+        # Score based on ratio of models with relationships
+        if relationship_ratio >= 0.8:
+            score.score += 20
+            score.findings.append("✓ Excellent relationship test coverage")
+        elif relationship_ratio >= 0.5:
+            score.score += 13
+            score.findings.append("✓ Good relationship test coverage")
+            score.recommendations.append("Add relationship tests to remaining mart models")
+        elif relationship_ratio >= 0.2:
+            score.score += 6
+            score.recommendations.append("⚠️ Many mart models lack relationship tests")
+            score.recommendations.append("   Example: relationships: {to: ref('dim_customers'), field: customer_id}")
         else:
-            score.recommendations.append("❌ Add relationship documentation (e.g., 'Joins to dim_customers on customer_id')")
+            score.recommendations.append("❌ Critical: Most mart models lack relationship tests to validate foreign key constraints")
+            score.recommendations.append("   Example: relationships: {to: ref('dim_customers'), field: customer_id}")
         
         return score
     
     def assess_temporal_consistency(self) -> AssessmentScore:
-        """Assess temporal column consistency (32 points)."""
-        score = AssessmentScore(score=0, max_score=32)
+        """Assess temporal column consistency (30 points)."""
+        score = AssessmentScore(score=0, max_score=30)
         
         fact_models = {k: v for k, v in self.models.items() if self._is_fact_model(v)}
         
@@ -703,14 +626,14 @@ class SemanticLayerReadinessAssessor:
         
         temporal_ratio = models_with_dates / len(fact_models) if fact_models else 0
         
-        score.findings.append(f"Mart models with date columns: {models_with_dates}/{len(fact_models)} ({temporal_ratio*100:.0f}%)")
+        score.findings.append(f"Fact models with date columns: {models_with_dates}/{len(fact_models)} ({temporal_ratio*100:.0f}%)")
         
-        # Score: Temporal column coverage (26 points)
+        # Score: Temporal column coverage (24 points)
         if temporal_ratio >= 0.8:
-            score.score += 26
+            score.score += 24
             score.findings.append("✓ Excellent temporal column coverage")
         elif temporal_ratio >= 0.5:
-            score.score += 16
+            score.score += 15
             score.recommendations.append("Add date columns to more fact tables")
         elif temporal_ratio >= 0.2:
             score.score += 6
@@ -734,8 +657,8 @@ class SemanticLayerReadinessAssessor:
         return score
     
     def assess_source_freshness(self) -> AssessmentScore:
-        """Assess source freshness configuration (13 points)."""
-        score = AssessmentScore(score=0, max_score=13)
+        """Assess source freshness configuration (15 points)."""
+        score = AssessmentScore(score=0, max_score=15)
         
         freshness_info = self._analyze_source_freshness()
         
@@ -751,14 +674,14 @@ class SemanticLayerReadinessAssessor:
         
         # Score based on freshness configuration coverage
         if ratio >= 0.8:
-            score.score += 13
+            score.score += 15
             score.findings.append("✓ Excellent source freshness coverage")
         elif ratio >= 0.5:
-            score.score += 8
+            score.score += 9
             score.findings.append("✓ Good source freshness coverage")
             score.recommendations.append("Add freshness checks to remaining sources")
         elif ratio >= 0.2:
-            score.score += 2
+            score.score += 3
             score.recommendations.append("⚠️ Configure freshness checks for more sources")
         else:
             if total > 0:
@@ -774,8 +697,8 @@ class SemanticLayerReadinessAssessor:
         return score
     
     def assess_ownership_metadata(self) -> AssessmentScore:
-        """Assess ownership metadata configuration (13 points)."""
-        score = AssessmentScore(score=0, max_score=13)
+        """Assess ownership metadata configuration (15 points)."""
+        score = AssessmentScore(score=0, max_score=15)
         
         mart_models = {k: v for k, v in self.models.items() if self._is_mart_model(v)}
         
@@ -789,40 +712,21 @@ class SemanticLayerReadinessAssessor:
         model_with_owner = ownership_info['models_with_owner']
         model_ratio = ownership_info['model_owner_ratio']
         
-        col_total = ownership_info['total_columns']
-        col_with_owner = ownership_info['columns_with_owner']
-        col_ratio = ownership_info['column_owner_ratio']
-        
         score.findings.append(f"Mart models with owner metadata: {model_with_owner}/{model_total} ({model_ratio*100:.0f}%)")
-        if col_total > 0:
-            score.findings.append(f"Columns with owner metadata: {col_with_owner}/{col_total} ({col_ratio*100:.0f}%)")
         
-        # Score based on model-level ownership (primary, 70% weight)
-        model_points = 0
+        # Score based on model-level ownership (15 points)
         if model_ratio >= 0.8:
-            model_points = 9
+            score.score = 15
             score.findings.append("✓ Excellent model ownership documentation")
         elif model_ratio >= 0.5:
-            model_points = 6
+            score.score = 10
             score.findings.append("✓ Good model ownership documentation")
             score.recommendations.append("Add owner metadata to remaining mart models")
         elif model_ratio >= 0.2:
-            model_points = 3
+            score.score = 5
             score.recommendations.append("⚠️ Add owner metadata to more models (e.g., meta: {owner: 'analytics-team'})")
         else:
             score.recommendations.append("❌ Critical: Add owner metadata to mart models for accountability")
-        
-        # Score based on column-level ownership (secondary, 30% weight)
-        col_points = 0
-        if col_total > 0:
-            if col_ratio >= 0.3:  # Lower bar for column-level
-                col_points = 4
-                score.findings.append("✓ Some columns have ownership metadata")
-            elif col_ratio >= 0.1:
-                col_points = 1
-                score.recommendations.append("Consider adding owner metadata to key columns")
-        
-        score.score = model_points + col_points
         
         return score
     
@@ -842,11 +746,11 @@ class SemanticLayerReadinessAssessor:
         
         # Calculate weighted total across all dimensions
         weights = {
+            'temporal_consistency': 0.30,
             'column_documentation': 0.20,
             'relationship_documentation': 0.20,
-            'temporal_consistency': 0.30,
-            'source_freshness': 0.15,
             'ownership_metadata': 0.15,
+            'source_freshness': 0.15,
         }
         
         total_score = sum(r.score for r in results.values())

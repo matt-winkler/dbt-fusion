@@ -116,3 +116,12 @@ measure_identification:
     - measure_columns
     - metric_columns
 
+# Ownership metadata configuration
+ownership_metadata:
+  # Metadata fields to check in config.meta for ownership information
+  meta_fields:
+    - owner
+    - owners
+    - team
+    - contact
+
