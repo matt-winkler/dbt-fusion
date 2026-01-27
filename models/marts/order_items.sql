@@ -1,3 +1,9 @@
+{{
+    config(
+        access='public'
+    )
+}}
+
 with
 
 order_items as (
